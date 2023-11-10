@@ -1,0 +1,24 @@
+{
+  "name": "api 文档",
+  "description": "Documentation for the REST api",
+  "version": "0.0.1",
+  "title": "api 文档 - apiDoc",
+  "url": "http://127.0.0.1:8080/api",
+  "sampleUrl": "http://127.0.0.1:8080/api",
+  "output": "doc",
+  "input": [
+    "doc/src"
+  ],
+  "order": [
+  ],
+  "header": {
+    "title": "说明",
+    "filename": "header.md"
+  },
+  "template": {
+    "showRequiredLabels": false,
+    "withCompare": true,
+    "withGenerator": true,
+    "aloneDisplay": false
+  }
+}
