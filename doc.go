@@ -36,7 +36,7 @@ func (doc *docDef) generateWithOldDoc(api ApiDef, olderDoc docDef) {
 	}
 
 	for k, v := range api.Headers {
-		doc.appendParam(&doc.ApiHeader, generateParamDef(k, strings.Join(v, " "), ""), olderDoc.ApiHeader)
+		doc.appendParam(&doc.ApiHeader, generateParamDef(k, v, ""), olderDoc.ApiHeader)
 	}
 
 	for k, v := range api.Queries {
