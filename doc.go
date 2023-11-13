@@ -28,7 +28,7 @@ func (doc *docDef) generateWithOldDoc(api ApiDef, olderDoc docDef) {
 	if len(olderDoc.ApiName) > 0 {
 		doc.ApiName = olderDoc.ApiName
 	} else {
-		doc.ApiName = fmt.Sprintf("%s-%s", api.Method, api.Path)
+		doc.ApiName = fmt.Sprintf("%s%s", api.Method, strings.ToUpper(api.group))
 	}
 
 	for k, v := range api.Params {

@@ -1,7 +1,6 @@
 package goapidoc
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -104,7 +103,6 @@ func parserParam(str string) (param paramDef) {
 
 		// [address.street=ZZZ]
 		matches := regexp.MustCompile(`\[?(\w+(?:\.\w+)*)(?:=([^]]+))?]?`).FindStringSubmatch(segments[1])
-		fmt.Println(segments[1], matches)
 		if len(matches) > 2 {
 			param.Field.Name = matches[1]
 		}
