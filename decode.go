@@ -102,7 +102,7 @@ func parserParam(str string) (param paramDef) {
 		param.Field.Required = !(strings.Contains(segments[1], "[") && strings.Contains(segments[1], "]"))
 
 		// [address.street=ZZZ]
-		matches := regexp.MustCompile(`\[?(\w+(?:\.\w+)?)(?:=([^]]+))?]?`).FindStringSubmatch(segments[1])
+		matches := regexp.MustCompile(`\[?(\w+(?:\.\w+)*)(?:=([^]]+))?]?`).FindStringSubmatch(segments[1])
 		if len(matches) > 2 {
 			param.Field.Name = matches[1]
 		}
