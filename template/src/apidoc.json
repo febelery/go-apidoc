@@ -3,8 +3,8 @@
   "description": "Documentation for the REST api",
   "version": "0.0.1",
   "title": "api 文档 - apiDoc",
-  "url": "http://127.0.0.1:8080/api",
-  "sampleUrl": "http://127.0.0.1:8080/api",
+  "url": "http://127.0.0.1:8080",
+  "sampleUrl": "http://127.0.0.1:8080",
   "output": "doc",
   "input": [
     "doc/src"
