@@ -12,6 +12,10 @@ import (
 )
 
 func New(api ApiDef) {
+	if api.Skip() {
+		return
+	}
+
 	api.group = api.extractGroupFromRoute()
 	api.version = getVersion()
 	file := getFilePath(fmt.Sprintf("src/%s.js", api.group))
