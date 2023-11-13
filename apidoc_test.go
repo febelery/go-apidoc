@@ -18,6 +18,6 @@ func TestNewDoc(t *testing.T) {
 
 	docs := NewDoc(api)
 	for _, doc := range docs {
-		fmt.Println(Marshal(*doc))
+		fmt.Println(marshal(*doc))
 	}
 }

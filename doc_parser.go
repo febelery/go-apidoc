@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-func ParseDocs(group string) DocsDef {
+func ParseDocs(group string) docsDef {
 	comment, err := readSrcFileContent(group + ".js")
 	if err != nil {
 		return nil
 	}
 
-	var docs DocsDef
+	var docs docsDef
 	matches := regexp.MustCompile(`(?s)/\*\*(.*?)\*/`).FindAllStringSubmatch(string(comment), -1)
 	for _, match := range matches {
 		contents := parseContent(match[1])
@@ -19,7 +19,7 @@ func ParseDocs(group string) DocsDef {
 			continue
 		}
 
-		decContents := Unmarshal(contents)
+		decContents := unmarshal(contents)
 		docs = append(docs, &decContents)
 	}
 

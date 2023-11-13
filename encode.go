@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Marshal(doc DocDef) (string, error) {
+func marshal(doc docDef) (string, error) {
 	var resultLines []string
 
 	if len(doc.Api.Method) < 1 || len(doc.Api.Path) < 1 || len(doc.Api.Title) < 1 {
@@ -65,7 +65,7 @@ func Marshal(doc DocDef) (string, error) {
 	for _, def := range doc.ApiErrorExample {
 		resultLines = append(resultLines, fmt.Sprintf("@respExampleDef %s", def))
 	}
-	result := fmt.Sprintf("/**\n\n%s\n\n*/", strings.Join(resultLines, "\n"))
+	result := fmt.Sprintf("/**\n\n%s\n\n*/\n\n", strings.Join(resultLines, "\n"))
 
 	return result, nil
 }

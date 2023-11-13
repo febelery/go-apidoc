@@ -34,7 +34,7 @@ type respExampleDef struct {
 	Example string
 }
 
-type DocDef struct {
+type docDef struct {
 	Api               routeDef         `name:"@api"`                      // @api {put} /user/:id 修改用户
 	ApiVersion        string           `name:"@apiVersion"`               // @apiVersion 0.0.1
 	ApiName           string           `name:"@apiName"`                  // @apiName UpdateUser
@@ -54,7 +54,7 @@ type DocDef struct {
 	ApiErrorExample   []respExampleDef `name:"@apiErrorExample,omitempty"`
 }
 
-type DocsDef []*DocDef
+type docsDef []*docDef
 
 type ApiDef struct {
 	Method       string

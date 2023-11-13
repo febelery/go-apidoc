@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Unmarshal(data []string) (doc DocDef) {
+func unmarshal(data []string) (doc docDef) {
 	for _, datum := range data {
 		parts := strings.SplitN(datum, " ", 2)
 		tag := strings.TrimPrefix(parts[0], "@")

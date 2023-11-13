@@ -13,20 +13,20 @@ import (
 )
 
 // NewDoc todo doc.ApiPermission | doc.ApiPrivate | doc.ApiUse
-func NewDoc(api ApiDef) DocsDef {
+func NewDoc(api ApiDef) docsDef {
 	group := api.extractGroupFromRoute()
 	version := getVersion()
 
 	docs := ParseDocs(group)
 	doc := docs.match(api)
-	oldDoc := new(DocDef)
+	oldDoc := new(docDef)
 
 	if doc == nil || doc.ApiVersion != version {
 		if doc != nil {
 			oldDoc = doc
 		}
 
-		doc = new(DocDef)
+		doc = new(docDef)
 		docs = append(docs, doc)
 
 		doc.Api.Title = fmt.Sprintf("%s[%s]", strings.ToUpper(api.Method), api.Path)
@@ -111,7 +111,7 @@ func (api ApiDef) extractGroupFromRoute() string {
 	return ""
 }
 
-func (docs DocsDef) match(api ApiDef) *DocDef {
+func (docs docsDef) match(api ApiDef) *docDef {
 	for i := range docs {
 		if docs[i].Api.Path == api.Path && docs[i].Api.Method == api.Method {
 			return docs[i]
@@ -121,7 +121,7 @@ func (docs DocsDef) match(api ApiDef) *DocDef {
 	return nil
 }
 
-func (doc *DocDef) appendParam(ps *[]paramDef, p paramDef, olds []paramDef) {
+func (doc *docDef) appendParam(ps *[]paramDef, p paramDef, olds []paramDef) {
 	for i := range *ps {
 		if (*ps)[i].Type.Type == p.Type.Type && (*ps)[i].Field.Name == p.Field.Name {
 			(*ps)[i].Field.Required = p.Field.Required
@@ -160,7 +160,7 @@ func (doc *DocDef) appendParam(ps *[]paramDef, p paramDef, olds []paramDef) {
 	*ps = append(*ps, p)
 }
 
-func (doc *DocDef) appendExample(rs *[]respExampleDef, r respExampleDef) {
+func (doc *docDef) appendExample(rs *[]respExampleDef, r respExampleDef) {
 	for i := range *rs {
 		if (*rs)[i].Http == r.Http {
 			(*rs)[i].Example = r.Example
@@ -174,7 +174,7 @@ func (doc *DocDef) appendExample(rs *[]respExampleDef, r respExampleDef) {
 func getVersion() string {
 	apidoc, err := readSrcFileContent("apidoc.json")
 	if err != nil {
-		slog.Warn("未解析到版本号，使用默认 0.0.1")
+		slog.Warn("no version found, use default[0.0.1]. err: ", err)
 		return "0.0.1"
 	}
 
@@ -184,7 +184,7 @@ func getVersion() string {
 
 	err = json.Unmarshal(apidoc, &ver)
 	if err != nil {
-		slog.Warn("no version found, use default[0.0.1]")
+		slog.Warn("no version found, use default[0.0.1]. err: ", err)
 		return "0.0.1"
 	}
 
@@ -201,8 +201,7 @@ func readSrcFileContent(file string) ([]byte, error) {
 		}
 	}
 
-	slog.Error(fmt.Sprintf("read file[%v]e failed, path: [%s]", file, filePaths))
-	return nil, fmt.Errorf("no file[%s] with content found", file)
+	return nil, fmt.Errorf("read file [%v] failed, path: [%s]", file, filePaths)
 }
 
 func extractFieldTypes(prefix string, data any, fieldMap map[string]string) {
