@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"reflect"
 	"regexp"
@@ -12,69 +11,21 @@ import (
 	"strings"
 )
 
-// NewDoc todo doc.ApiPermission | doc.ApiPrivate | doc.ApiUse
-func NewDoc(api ApiDef) docsDef {
-	group := api.extractGroupFromRoute()
-	version := getVersion()
+func New(api ApiDef) {
+	api.group = api.extractGroupFromRoute()
+	api.version = getVersion()
+	file := getFilePath(fmt.Sprintf("src/%s.js", api.group))
 
-	docs := ParseDocs(group)
+	docs := parseDocs(file)
 	doc := docs.match(api)
-	oldDoc := new(docDef)
-
-	if doc == nil || doc.ApiVersion != version {
-		if doc != nil {
-			oldDoc = doc
-		}
-
+	olderDoc := *doc
+	if doc.ApiVersion != api.version {
 		doc = new(docDef)
 		docs = append(docs, doc)
-
-		doc.Api.Title = fmt.Sprintf("%s[%s]", strings.ToUpper(api.Method), api.Path)
-		doc.Api.Method = strings.ToLower(api.Method)
-		doc.Api.Path = api.Path
-
-		doc.ApiGroup = group
-		doc.ApiVersion = version
-		doc.ApiDescription = fmt.Sprintf("%s %s ", strings.ToUpper(api.Method), api.Path)
-		doc.ApiName = fmt.Sprintf("%s-%s", api.Method, api.Path)
 	}
+	doc.generateWithOldDoc(api, olderDoc)
 
-	for k, v := range api.Params {
-		doc.appendParam(&doc.ApiParam, generateParamDef(k, v, ""), oldDoc.ApiParam)
-	}
-
-	for k, v := range api.Headers {
-		doc.appendParam(&doc.ApiHeader, generateParamDef(k, v, ""), oldDoc.ApiHeader)
-	}
-
-	for k, v := range api.Queries {
-		doc.appendParam(&doc.ApiQuery, generateParamDef(k, v, ""), oldDoc.ApiQuery)
-	}
-
-	respExample := respExampleDef{
-		Type:    "json",
-		Title:   http.StatusText(api.StatusCode),
-		Http:    fmt.Sprintf("HTTP/1.1 %d %s", api.StatusCode, http.StatusText(api.StatusCode)),
-		Example: string(api.ResponseBody),
-	}
-
-	if api.StatusCode < 400 {
-		doc.appendExample(&doc.ApiSuccessExample, respExample)
-	} else {
-		doc.appendExample(&doc.ApiErrorExample, respExample)
-	}
-
-	fieldTypes := api.extractFieldTypeFromResponse()
-	for field, typ := range fieldTypes {
-		param := generateParamDef(field, "", typ)
-		if api.StatusCode < 400 {
-			doc.appendParam(&doc.ApiSuccess, param, oldDoc.ApiSuccess)
-		} else {
-			doc.appendParam(&doc.ApiError, param, oldDoc.ApiError)
-		}
-	}
-
-	return docs
+	docs.saveAs(file).toHtmlDoc(getFilePath("src/apidoc.json"), getFilePath("api"))
 }
 
 func (api ApiDef) extractFieldTypeFromResponse() map[string]string {
@@ -111,68 +62,8 @@ func (api ApiDef) extractGroupFromRoute() string {
 	return ""
 }
 
-func (docs docsDef) match(api ApiDef) *docDef {
-	for i := range docs {
-		if docs[i].Api.Path == api.Path && docs[i].Api.Method == api.Method {
-			return docs[i]
-		}
-	}
-
-	return nil
-}
-
-func (doc *docDef) appendParam(ps *[]paramDef, p paramDef, olds []paramDef) {
-	for i := range *ps {
-		if (*ps)[i].Type.Type == p.Type.Type && (*ps)[i].Field.Name == p.Field.Name {
-			(*ps)[i].Field.Required = p.Field.Required
-			(*ps)[i].Field.Default = p.Field.Default
-			return
-		}
-	}
-
-	for _, old := range olds {
-		if old.Field.Name != p.Field.Name {
-			continue
-		}
-
-		if len(old.Description) > 0 && len(p.Description) < 1 {
-			p.Description = old.Description
-		}
-
-		if len(old.Type.Size) > 0 && len(p.Type.Size) < 1 {
-			p.Type.Size = old.Type.Size
-		}
-
-		if old.Type.Allows != nil && p.Type.Allows == nil {
-			p.Type.Allows = old.Type.Allows
-		}
-
-		if old.Field.Required && !p.Field.Required {
-			p.Field.Required = old.Field.Required
-		}
-
-		if len(old.Field.Default) > 0 && len(p.Field.Default) < 1 {
-			p.Field.Default = old.Field.Default
-		}
-
-	}
-
-	*ps = append(*ps, p)
-}
-
-func (doc *docDef) appendExample(rs *[]respExampleDef, r respExampleDef) {
-	for i := range *rs {
-		if (*rs)[i].Http == r.Http {
-			(*rs)[i].Example = r.Example
-			return
-		}
-	}
-
-	*rs = append(*rs, r)
-}
-
 func getVersion() string {
-	apidoc, err := readSrcFileContent("apidoc.json")
+	apidoc, err := os.ReadFile(getFilePath("src/apidoc.json"))
 	if err != nil {
 		slog.Warn("no version found, use default[0.0.1]. err: ", err)
 		return "0.0.1"
@@ -191,17 +82,20 @@ func getVersion() string {
 	return ver.Version
 }
 
-func readSrcFileContent(file string) ([]byte, error) {
-	filePaths := []string{"doc/src/", "../doc/src/", "../../doc/src/", "template/src/"}
+func getFilePath(file string) string {
+	dirPath := []string{"doc/", "../doc/", "../../doc/", "template/"}
+	fullPath := ""
 
-	for _, filePath := range filePaths {
-		content, err := os.ReadFile(filePath + file)
-		if err == nil && len(content) > 0 {
-			return content, nil
+	for _, path := range dirPath {
+		if _, err := os.Stat(path); err == nil {
+			fullPath = path
+			break
 		}
 	}
+	fullPath += file
 
-	return nil, fmt.Errorf("read file [%v] failed, path: [%s]", file, filePaths)
+	return fullPath
+
 }
 
 func extractFieldTypes(prefix string, data any, fieldMap map[string]string) {

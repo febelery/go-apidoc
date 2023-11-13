@@ -1,12 +1,16 @@
 package goapidoc
 
 import (
+	"log/slog"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 )
 
-func ParseDocs(group string) docsDef {
-	comment, err := readSrcFileContent(group + ".js")
+// parseDocs 根据group前缀挑选group.js文件，并解析成docs格式的语法
+func parseDocs(file string) docsDef {
+	comment, err := os.ReadFile(file)
 	if err != nil {
 		return nil
 	}
@@ -14,7 +18,7 @@ func ParseDocs(group string) docsDef {
 	var docs docsDef
 	matches := regexp.MustCompile(`(?s)/\*\*(.*?)\*/`).FindAllStringSubmatch(string(comment), -1)
 	for _, match := range matches {
-		contents := parseContent(match[1])
+		contents := parserContent(match[1])
 		if len(contents) < 1 {
 			continue
 		}
@@ -26,7 +30,7 @@ func ParseDocs(group string) docsDef {
 	return docs
 }
 
-func parseContent(content string) []string {
+func parserContent(content string) []string {
 	apiAnnotePrefix := "@api"
 	var resultLines []string
 
@@ -63,4 +67,47 @@ func parseContent(content string) []string {
 	}
 
 	return resultLines
+}
+
+func (docs docsDef) match(api ApiDef) *docDef {
+	doc := new(docDef)
+
+	for i := range docs {
+		if docs[i].Api.Path == api.Path && strings.ToLower(docs[i].Api.Method) == strings.ToLower(api.Method) {
+			doc = docs[i]
+			break
+		}
+	}
+
+	return doc
+}
+
+// saveAs 最终结果保存为文件
+func (docs docsDef) saveAs(file string) docsDef {
+	var docStr string
+	for _, d := range docs {
+		s, err := marshal(*d)
+		if err == nil {
+			docStr += s
+		}
+	}
+
+	if len(docStr) < 1 {
+		return nil
+	}
+
+	os.WriteFile(file, []byte(docStr), 0644)
+
+	return docs
+}
+
+func (docs docsDef) toHtmlDoc(configPath, docPath string) {
+	cmd := exec.Command("apidoc", "-c", configPath, "-o", docPath)
+	_, err := cmd.Output()
+	if err != nil {
+		slog.Error("使用apidoc生成文档错误", err)
+		return
+	}
+
+	slog.Info("使用apidoc生成文档成功")
 }

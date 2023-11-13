@@ -60,8 +60,10 @@ type ApiDef struct {
 	Method       string
 	Path         string
 	Params       map[string]string
-	Headers      map[string]string
+	Headers      map[string][]string
 	Queries      map[string]string
 	StatusCode   int
 	ResponseBody []byte
+	group        string
+	version      string
 }

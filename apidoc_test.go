@@ -1,7 +1,6 @@
 package goapidoc
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -16,8 +15,5 @@ func TestNewDoc(t *testing.T) {
 		ResponseBody: []byte(`{ "code": 0, "data": { "url": "https://cdn.the.cn", "nickname": "yyy" }, "meta": { "token": "yJhbGciOinR5cCI" } }`),
 	}
 
-	docs := NewDoc(api)
-	for _, doc := range docs {
-		fmt.Println(marshal(*doc))
-	}
+	New(api)
 }
