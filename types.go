@@ -64,7 +64,7 @@ type ApiDef struct {
 	Queries      map[string]string
 	StatusCode   int
 	ResponseBody []byte
-	Skip         func() bool
+	Skip         bool
 	group        string
 	version      string
 }

@@ -73,9 +73,13 @@ func (docs docsDef) match(api ApiDef) *docDef {
 	doc := new(docDef)
 
 	for i := range docs {
-		if docs[i].Api.Path == api.Path && strings.ToLower(docs[i].Api.Method) == strings.ToLower(api.Method) {
+		if docs[i].Api.Path != api.Path || strings.ToLower(docs[i].Api.Method) != strings.ToLower(api.Method) {
+			continue
+		}
+		if doc == nil {
 			doc = docs[i]
-			break
+		} else if docs[i].ApiVersion == api.version {
+			doc = docs[i]
 		}
 	}
 

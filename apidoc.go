@@ -12,7 +12,7 @@ import (
 )
 
 func New(api ApiDef) {
-	if api.Skip() {
+	if api.Skip {
 		return
 	}
 
