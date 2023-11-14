@@ -11,6 +11,32 @@ go get -u github.com/febelery/go-apidoc
 npm install -g apidoc
 ```
 
+## 使用
+
+- gofiber 框架
+```golang
+app.Static("/doc", "doc/api")
+app.Static("/assets", "doc/api/assets")
+
+app.Use(func(c *fiber.Ctx) error {
+  err := c.Next()
+  skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" && debug
+
+  go goapidoc.New(goapidoc.ApiDef{
+    Method:       c.Method(),
+    Path:         c.Route().Path,
+    Params:       c.AllParams(),
+    Headers:      nil,
+    Queries:      c.Queries(),
+    StatusCode:   c.Response().StatusCode(),
+    ResponseBody: c.Response().Body(),
+    Skip:         skip,
+  })
+
+  return err
+})
+```
+
 ## 依赖
 
 - Go >= 1.21
