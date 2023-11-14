@@ -20,7 +20,7 @@ app.Static("/assets", "doc/api/assets")
 
 app.Use(func(c *fiber.Ctx) error {
   err := c.Next()
-  skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" && debug
+  skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" && local
 
   go goapidoc.New(goapidoc.ApiDef{
     Method:       c.Method(),
