@@ -23,6 +23,17 @@ func init() {
 		}
 		slog.Info("init doc successful.")
 	}
+
+	// 判断apidoc命令是否存在
+	if _, err := exec.LookPath("apidoc"); err != nil {
+		cmd := exec.Command("npm", "install", "apidoc", "-g")
+		err := cmd.Run()
+		if err != nil {
+			slog.Error("安装apidoc命令失败：", err)
+		} else {
+			slog.Info("apidoc 安装成功")
+		}
+	}
 }
 
 // 使用 go list 查询包路径
