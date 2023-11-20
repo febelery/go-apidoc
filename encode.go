@@ -63,7 +63,7 @@ func marshal(doc docDef) (string, error) {
 		resultLines = append(resultLines, fmt.Sprintf("@apiError %s", def))
 	}
 	for _, def := range doc.ApiErrorExample {
-		resultLines = append(resultLines, fmt.Sprintf("@respExampleDef %s", def))
+		resultLines = append(resultLines, fmt.Sprintf("@apiErrorExample %s", def))
 	}
 	result := fmt.Sprintf("/**\n\n%s\n\n*/\n\n", strings.Join(resultLines, "\n"))
 
