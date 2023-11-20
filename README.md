@@ -23,11 +23,16 @@ app.Use(func(c *fiber.Ctx) error {
   skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" ||
             strings.ToLower(os.Getenv("SKIP_DOC")) == "true"
 
+  headers := make(map[string]string)
+  if auth := c.GetReqHeaders()["Authorization"]; len(auth) > 0 {
+    headers["Authorization"] = auth[0]
+  }
+
   go goapidoc.New(goapidoc.ApiDef{
     Method:       c.Method(),
     Path:         c.Route().Path,
     Params:       c.AllParams(),
-    Headers:      nil,
+    Headers:      headers,
     Queries:      c.Queries(),
     StatusCode:   c.Response().StatusCode(),
     ResponseBody: c.Response().Body(),
