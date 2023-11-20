@@ -20,7 +20,8 @@ app.Static("/assets", "doc/api/assets")
 
 app.Use(func(c *fiber.Ctx) error {
   err := c.Next()
-  skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" && local
+  skip := string(c.Response().Header.Peek("Content-Type")) != "application/json" ||
+            strings.ToLower(os.Getenv("SKIP_DOC")) == "true"
 
   go goapidoc.New(goapidoc.ApiDef{
     Method:       c.Method(),
@@ -42,5 +43,4 @@ app.Use(func(c *fiber.Ctx) error {
 - Go >= 1.21
 - Node.js
 - apidoc：https://github.com/apidoc/apidoc
-- bubbletea: https://github.com/charmbracelet/bubbletea
 
