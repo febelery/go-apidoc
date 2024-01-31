@@ -165,9 +165,14 @@ func extractFieldTypes(prefix string, data any, fieldMap map[string]string) {
 func generateParamDef(key, val, typ string) paramDef {
 	if typ == "" {
 		typ = "String"
-		if _, err := strconv.Atoi(val); err != nil {
+		if i, err := strconv.Atoi(val); err != nil && i > 0 {
 			typ = "Number"
 		}
+	}
+
+	// 移除Bearer
+	if strings.Contains(val, "Bearer") || strings.Contains(val, "bearer") {
+		val = "Bearer "
 	}
 
 	param := paramDef{
